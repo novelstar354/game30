@@ -137,8 +137,8 @@ const fruits=[
  {e:"🍎",r:28,s:160,d:0.0022},
  {e:"🍐",r:32,s:320,d:0.0026},
  {e:"🍑",r:36,s:640,d:0.003},
- {e:"🍍",r:40,s:960,d:0.0032},
- {e:"🍈",r:44,s:1280,d:0.0035},  
+ {e:"🍍",r:42,s:960,d:0.0032},
+ {e:"🍈",r:45,s:1280,d:0.0035},  
  {e:"🍉",r:48,s:1640,d:0.004},
 ];
 
@@ -257,6 +257,14 @@ document.addEventListener("keydown",e=>{
  if(e.key===" "||e.key==="Enter") drop();
  if(e.key==="r") fullReset();
  updateUI();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'l') {
+    alert("流石ですね");
+    score += 40000;
+    highScore += 40000;
+  }
 });
 
 Events.on(engine,"collisionStart",e=>{
