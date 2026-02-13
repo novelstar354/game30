@@ -16,6 +16,12 @@ body{
  min-height:100svh;
  background:#0f172a;
  font-family:system-ui;
+touch-action: none;
+overflow: hidden;
+touch-action: none;
+overflow: hidden;
+
+
 }
 #wrap{
  background:#fff7ed;
@@ -111,7 +117,7 @@ canvas{
 
 <script>
 const {Engine,Render,Runner,Bodies,World,Events,Sleeping}=Matter;
-const SAVE_KEY="suika_full";
+const SAVE_KEY="suika1";
 
 const canvas=document.getElementById("world");
 const wrap=document.getElementById("wrap");
@@ -272,20 +278,77 @@ function load(){
 }
 
 canvas.addEventListener("pointermove",e=>{
+/* ===== 正しいタッチ操作 ===== */
+let touching = false;
+let startInside = false;
+
+canvas.addEventListener("touchstart", e=>{
+  if(gameOver) return;
+
+  const r = canvas.getBoundingClientRect();
+  const x = e.touches[0].clientX;
+  const y = e.touches[0].clientY;
+
+  // キャンバス内で触ったか判定
+  startInside =
+    x >= r.left && x <= r.right &&
+    y >= r.top  && y <= r.bottom;
+
+  if(!startInside) return;
+
+  touching = true;
+
+  const cx = x - r.left;
+  guideX = Math.max(20, Math.min(340, cx));
+  updateUI();
+
+  e.preventDefault();
+}, {passive:false});
+
+canvas.addEventListener("touchmove", e=>{
+  if(!touching) return;
+
+  const r = canvas.getBoundingClientRect();
+  const x = e.touches[0].clientX - r.left;
+  guideX = Math.max(20, Math.min(340, x));
+  updateUI();
+
+  e.preventDefault();
+}, {passive:false});
+
+canvas.addEventListener("touchend", e=>{
+  if(!touching || !startInside) return;
+
+  touching = false;
+  startInside = false;
+
+  drop(); // ここでだけ落ちる
+}, {passive:false});
+
+
+
  if(gameOver) return;
  const r=canvas.getBoundingClientRect();
  guideX=Math.max(20,Math.min(340,e.clientX-r.left));
  updateUI();
 });
-canvas.addEventListener("pointerdown",drop);
+//canvas.addEventListener("pointerdown",drop);
+
+
 
 document.addEventListener("keydown",e=>{
  if(e.key==="ArrowLeft"||e.key==="a") guideX=Math.max(20,guideX-10);
  if(e.key==="ArrowRight"||e.key==="d") guideX=Math.min(340,guideX+10);
- if(e.key===" "||e.key==="Enter") drop();
+
+ if(e.key===" "||e.key==="Enter"){
+   e.preventDefault();
+   drop();
+ }
+
  if(e.key==="r") fullReset();
  updateUI();
 });
+
 
 document.addEventListener('keydown', e => {
   if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'l') {
