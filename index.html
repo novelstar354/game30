@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>フルーツゲーム</title>
+<title>サクランボゲーム</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<link rel="icon" href="https://tsukatte.com/wp-content/uploads/2019/01/watermelon-cut-big.png" sizes="16×16" type="image/png" /> 
+<link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShVzGufkaFQcjBqPmMnsxRO2-Jc9B39uTG3A&s" sizes="16×16" type="image/png" /> 
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
 
 <style>
@@ -89,6 +89,19 @@ canvas{
  color:#64748b;
  margin-top:4px;
 }
+#restartBtn{
+  font-size:18px;
+  padding:8px 18px;
+  border:none;
+  border-radius:999px;
+  background:#22c55e;
+  color:white;
+  cursor:pointer;
+}
+#restartBtn:hover{
+  background:#16a34a;
+}
+
 </style>
 </head>
 <body>
@@ -109,10 +122,14 @@ canvas{
  <div id="guide"></div>
  <canvas id="world" width="360" height="520"></canvas>
  <div class="hint">← → / A D / Space / Enter / R<br>
- シンカの線：🍒→🍓→🍇→🍊→🍎→🍐→🍑→🍍→🍈→🍉
+ タイカの線：🍉→🍈→🍍→🍑→🍐→🍎→🍊→🍇→🍓→🍒
 </div>
 
- <div id="over" class="over" style="display:none">GAME OVER</div>
+<div id="over" class="over" style="display:none">
+  <div>GAME OVER</div>
+  <button id="restartBtn">RESTART</button>
+</div>
+
 </div>
 
 <script>
@@ -165,7 +182,7 @@ Runner.run(Runner.create(),engine);
 ]; */
 /* 🍎 本家サイズ比 */
 const fruits=[
- {e:"🍒",r:14,s:10,d:0.001},
+{e:"🍒",r:14,s:10,d:0.001},
  {e:"🍓",r:18,s:20,d:0.0012},
  {e:"🍇",r:23,s:40,d:0.0015},
  {e:"🍊",r:28,s:80,d:0.0018},
@@ -173,9 +190,10 @@ const fruits=[
  {e:"🍐",r:38,s:320,d:0.0026},
  {e:"🍑",r:44,s:640,d:0.003},
  {e:"🍍",r:50,s:960,d:0.0032},
- {e:"🍈",r:56,s:1280,d:0.0035},  
- {e:"🍉",r:62,s:1640,d:0.004},
+ {e:"🍈",r:56,s:1280,d:0.0035},
+ {e:"🍉",r:62,s:2048,d:0.004},
 ];
+
 let score=0,highScore=0;
 let current=0,next=0;
 let canDrop=true,gameOver=false;
@@ -388,18 +406,29 @@ Events.on(engine,"collisionStart",e=>{
 
 Events.on(engine,"beforeUpdate",()=>{
  if(gameOver) return;
- const danger=engine.world.bodies
-  .filter(b=>b.fruitType!==undefined && b.position.y<90);
- if(danger.length){
-  overTimer+=engine.timing.delta;
-  if(overTimer>800){
-   gameOver=true;
+
+ const isDanger = engine.world.bodies.some(b=>{
+   if(b.fruitType===undefined) return false;
+
+   // 生成直後は無視（まだ上にあるため）
+   if(b.position.y < 197) return false;
+
+   const top = b.position.y - b.circleRadius;
+   return top < 130;
+ });
+
+ if(isDanger){
+   gameOver = true;
    guide.style.display="none";
    overEl.style.display="flex";
    save();
-  }
- }else overTimer=0;
+ }
 });
+
+document.getElementById("restartBtn").onclick = ()=>{
+  fullReset();
+};
+
 
 document.getElementById("resetBtn").onclick=fullReset;
 load();
