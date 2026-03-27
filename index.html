@@ -371,7 +371,7 @@ document.addEventListener("keydown",e=>{
 
  if(e.key==="r") fullReset();
  updateUI();
-    //suikaCount=0;
+    suikaCount=0;
 });
 
 
@@ -400,6 +400,7 @@ Events.on(engine,"collisionStart",e=>{
 
    if(t === fruits.length - 1){ // スイカの場合
   suikaCount++; // カウンター増加
+    score += 1500;
   updateUI(); // UI反映
   setTimeout(()=>{
     World.remove(engine.world,[a,b]); // 消す
